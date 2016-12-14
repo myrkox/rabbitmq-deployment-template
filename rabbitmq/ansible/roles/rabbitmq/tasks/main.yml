@@ -1,0 +1,126 @@
+---
+
+- name: add trusted key
+  apt_key: url="https://www.rabbitmq.com/rabbitmq-signing-key-public.asc" state=present
+
+- name: add rabbitmq official apt repository
+  apt_repository: repo='deb http://www.rabbitmq.com/debian/ testing main' state=present update_cache=yes
+
+- name: install package
+  apt: name=rabbitmq-server allow_unauthenticated=yes
+
+- name: start rabbitmq
+  service: name=rabbitmq-server state=started
+
+- name: copy rabbitmq.config
+  copy:
+    src: rabbitmq.config
+    dest: /etc/rabbitmq/rabbitmq.config
+
+- name: restart rabbitmq
+  service: name=rabbitmq-server state=restarted
+
+- name: enable rabbitmq plugins
+  rabbitmq_plugin: names=rabbitmq_management state=enabled
+
+- name: restart rabbitmq
+  service: name=rabbitmq-server state=restarted
+
+- name: setup rabbitmqadmin config
+  get_url:
+    url: http://localhost:15672/cli/rabbitmqadmin
+    dest: /usr/local/bin/rabbitmqadmin
+
+- name: chmod rabbitmqadmin
+  shell: chmod +x /usr/local/bin/rabbitmqadmin
+
+- name: ensure vhost {{ application_virtual_host }} is present
+  rabbitmq_vhost: name={{ application_virtual_host }} state=present
+
+- name: add users to default host
+  rabbitmq_user:
+    user: "{{ application_user }}"
+    password: "{{ application_user_password }}"
+    tags: administrator,{{ application_user }}
+    permissions:
+      - vhost: /
+        configure_priv: .*
+        read_priv: .*
+        write_priv: .*
+    state: present
+
+- name: add users to  "{{ application_virtual_host }}" host
+  rabbitmq_user:
+    user: "{{ application_user }}"
+    password: "{{ application_user_password }}"
+    tags: administrator,{{ application_user }}
+    permissions:
+      - vhost: "{{ application_virtual_host }}"
+        configure_priv: .*
+        read_priv: .*
+        write_priv: .*
+    state: present
+
+- name: remove default guest user
+  rabbitmq_user: user=guest state=absent
+
+- name: create exchange {{ application_exchange_web }}
+  rabbitmq_exchange:
+    name: "{{ application_exchange_web }}"
+    type: direct
+    vhost: "{{ application_virtual_host }}"
+    login_user: "{{ application_user }}"
+    login_password: "{{ application_user_password }}"
+    state: present
+
+- name: create queue {{ application_queue_web }}
+  rabbitmq_queue:
+    name: "{{ application_queue_web }}"
+    durable: true
+    vhost: "{{ application_virtual_host }}"
+    login_user: "{{ application_user }}"
+    login_password: "{{ application_user_password }}"
+    state: present
+
+- name: make binding between exchange {{ application_exchange_web }} and queue {{ application_queue_web }}
+  rabbitmq_binding:
+    name: "{{ application_exchange_web }}"
+    destination: "{{ application_queue_web }}"
+    destination_type: queue
+    type: queue
+    vhost: "{{ application_virtual_host }}"
+    login_user: "{{ application_user }}"
+    login_password: "{{ application_user_password }}"
+    state: present
+
+- name: create exchange {{ application_exchange_convertation_video }}
+  rabbitmq_exchange:
+    name: "{{ application_exchange_convertation_video }}"
+    type: direct
+    vhost: "{{ application_virtual_host }}"
+    login_user: "{{ application_user }}"
+    login_password: "{{ application_user_password }}"
+#    state: present
+
+- name: create queue {{ application_queue_convertation_video }}
+  rabbitmq_queue:
+    name: "{{ application_queue_convertation_video }}"
+    durable: true
+    vhost: "{{ application_virtual_host }}"
+    login_user: "{{ application_user }}"
+    login_password: "{{ application_user_password }}"
+    state: present
+
+- name: make binding between exchange {{ application_exchange_convertation_video }} and queue {{ application_queue_convertation_video }}
+  rabbitmq_binding:
+    name: "{{ application_exchange_convertation_video }}"
+    destination: "{{ application_queue_convertation_video }}"
+    destination_type: queue
+    type: queue
+    vhost: "{{ application_virtual_host }}"
+    login_user: "{{ application_user }}"
+    login_password: "{{ application_user_password }}"
+    state: present
+
+- name: restart rabbitmq
+  service: name=rabbitmq-server state=restarted

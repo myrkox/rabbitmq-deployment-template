@@ -1,0 +1,4 @@
+/rabbitmq/terraform/terraform.tfstate
+/rabbitmq/terraform/terraform.tfstate.backup
+/rabbitmq/terraform/terraform.tfvars
+/rabbitmq/ansible/roles/rabbitmq/vars/main.yml

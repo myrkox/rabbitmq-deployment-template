@@ -1,0 +1,8 @@
+application_virtual_host: app
+application_user: user
+application_user_password: password
+application_exchange_web: send-web
+application_queue_web: send-web
+application_exchange_convertation_video: convertation_video
+application_queue_convertation_video: convertation_video
+

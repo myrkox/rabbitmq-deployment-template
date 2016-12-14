@@ -1,0 +1,8 @@
+---
+
+- name: install rabbitmq on instance
+  hosts: localhost
+  become: true
+  become_method: sudo
+  roles:
+    - rabbitmq

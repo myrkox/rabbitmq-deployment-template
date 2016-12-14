@@ -1,0 +1,8 @@
+access_key      = "key"
+secret_key      = "pass"
+region          = "eu-central-1"
+key_name        = "key"
+public_key_path = "/home/user/.ssh/key.pub"
+ami           = "ami-8911d0e6"
+instance_type = "t2.micro"
+user = "ubuntu"
