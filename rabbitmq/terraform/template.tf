@@ -99,6 +99,7 @@ resource "aws_instance" "rabbitmq" {
 
   provisioner "remote-exec" {
     inline = [
+      "sudo hostname localhost",
       "sudo service rabbitmq-server restart",
     ]
   }

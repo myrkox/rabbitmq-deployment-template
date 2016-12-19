@@ -17,22 +17,22 @@
     src: rabbitmq.config
     dest: /etc/rabbitmq/rabbitmq.config
 
+- name: copy rabbitmq rabbitmq-env.conf
+  copy:
+    src: rabbitmq-env.conf
+    dest: /etc/rabbitmq/rabbitmq-env.conf
+
+- name: chmod 755 rabbitmq-env
+  shell: chmod 755 /etc/rabbitmq/rabbitmq-env.conf
+
+- name: setup hostname as localhost
+  shell: hostname localhost
+
 - name: restart rabbitmq
   service: name=rabbitmq-server state=restarted
 
 - name: enable rabbitmq plugins
   rabbitmq_plugin: names=rabbitmq_management state=enabled
-
-- name: restart rabbitmq
-  service: name=rabbitmq-server state=restarted
-
-- name: setup rabbitmqadmin config
-  get_url:
-    url: http://localhost:15672/cli/rabbitmqadmin
-    dest: /usr/local/bin/rabbitmqadmin
-
-- name: chmod rabbitmqadmin
-  shell: chmod +x /usr/local/bin/rabbitmqadmin
 
 - name: ensure vhost {{ application_virtual_host }} is present
   rabbitmq_vhost: name={{ application_virtual_host }} state=present
@@ -100,7 +100,7 @@
     vhost: "{{ application_virtual_host }}"
     login_user: "{{ application_user }}"
     login_password: "{{ application_user_password }}"
-#    state: present
+    state: present
 
 - name: create queue {{ application_queue_convertation_video }}
   rabbitmq_queue:
